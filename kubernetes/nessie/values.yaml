@@ -1,0 +1,66 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/projectnessie/nessie
+  pullPolicy: IfNotPresent
+  tag: "0.104.1"
+  configDir: /deployments/config
+
+logLevel: INFO
+
+versionStoreType: JDBC
+
+jdbc:
+  jdbcUrl: jdbc:postgresql://common-postgresql.common.svc.cluster.local:5432/nessie?currentSchema=public
+  secret:
+    name: nessie-version-store-secret
+    username: username
+    password: password
+
+catalog:
+  enabled: true
+  iceberg:
+    defaultWarehouse: spark_kyuubi
+    warehouses:
+      - name: spark_kyuubi
+        location: s3://spark-kyuubi
+
+  storage:
+    s3:
+      defaultOptions:
+        region: us-east-1
+        endpoint: http://minio-tenant-hl.spark-kyuubi.svc.cluster.local:9000
+        pathStyleAccess: true
+        authType: STATIC
+        accessKeySecret:
+          name: nessie-minio-secret
+          awsAccessKeyId: awsAccessKeyId
+          awsSecretAccessKey: awsSecretAccessKey
+
+authentication:
+  enabled: false
+
+serviceAccount:
+  create: true
+
+service:
+  type: ClusterIP
+  ports:
+    - name: nessie-server
+      number: 19120
+
+managementService:
+  portName: nessie-mgmt
+  portNumber: 9000
+    
+resources:
+  # In production, you may want to increase these values.
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 4000m
+    memory: 4Gi
+
+autoscaling:
+  enabled: false

@@ -1,0 +1,15 @@
+operator:
+  image:
+    repository: minio/operator
+    tag: v7.1.1
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    # In production, you may want to increase these values.
+    requests:
+      cpu: 200m
+      memory: 256Mi
+      ephemeral-storage: 500Mi
+    limits:
+      cpu: 4000m
+      memory: 8Gi

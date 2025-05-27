@@ -1,0 +1,39 @@
+secrets: ~
+
+tenant:
+  name: minio-tenant
+  image:
+    repository: minio/minio
+    tag: RELEASE.2025-04-22T22-12-26Z
+    pullPolicy: IfNotPresent
+  certificate:
+    requestAutoCert: false
+  configSecret: 
+    existingSecret: true
+    name: minio-tenant-secret
+    accessKey: ""
+    secretKey: ""
+  configuration:
+    name: minio-tenant-secret
+  exposeServices:
+    minio: false
+    console: false
+  pools:
+    - servers: 1
+      name: common-pool
+      volumesPerServer: 1
+      size: 50Gi
+      resources:
+        # In production, you may want to increase these values.
+        requests:
+          cpu: 200m
+          memory: 256Mi
+        limits:
+          cpu: 4000m
+          memory: 8Gi
+
+ingress:
+  api:
+    enabled: false
+  console:
+    enabled: false

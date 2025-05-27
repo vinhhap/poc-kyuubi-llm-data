@@ -1,0 +1,31 @@
+image:
+  tag: "17"
+auth:
+  enablePostgresUser: true
+  existingSecret: postgres-auth-secret
+  secretKeys:
+    adminPasswordKey: postgres-password
+architecture: standalone
+containerPorts:
+  postgresql: 5432
+postgresqlDataDir: /bitnami/postgresql/data
+primary:
+  name: primary
+  resources:
+    # In production, you may want to increase these values.
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+  service:
+    type: ClusterIP
+    ports:
+      postgresql: 5432
+  persistence:
+    enabled: true
+  persistentVolumeClaimRetentionPolicy:
+    enabled: true
+    whenScaled: Retain
+    whenDeleted: Retain
