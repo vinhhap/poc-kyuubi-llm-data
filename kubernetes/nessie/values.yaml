@@ -11,7 +11,8 @@ logLevel: INFO
 versionStoreType: JDBC
 
 jdbc:
-  jdbcUrl: jdbc:postgresql://common-postgresql.common.svc.cluster.local:5432/nessie?currentSchema=public
+  # Point this to your PostgreSQL instance.
+  jdbcUrl: jdbc:postgresql://spark-kyuubi-postgresql.spark-kyuubi.svc.cluster.local:5432/nessie?currentSchema=public
   secret:
     name: nessie-version-store-secret
     username: username
@@ -23,12 +24,14 @@ catalog:
     defaultWarehouse: spark_kyuubi
     warehouses:
       - name: spark_kyuubi
+        # Change this to your Minio bucket.
         location: s3://spark-kyuubi
 
   storage:
     s3:
       defaultOptions:
         region: us-east-1
+        # Point this to your MinIO tenant.
         endpoint: http://minio-tenant-hl.spark-kyuubi.svc.cluster.local:9000
         pathStyleAccess: true
         authType: STATIC
