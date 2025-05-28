@@ -1,0 +1,119 @@
+# Bitnami OpenLDAP PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openldap-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Mi
+
+---
+
+# Bitnami OpenLDAP Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openldap
+  labels:
+    app: openldap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openldap
+  template:
+    metadata:
+      labels:
+        app: openldap
+    spec:
+      containers:
+      - name: openldap
+        image: "bitnami/openldap:2.6.9"
+        ports:
+        - containerPort: 1389
+        - containerPort: 1636
+        volumeMounts:
+        - name: data
+          mountPath: /bitnami/openldap
+        envFrom:
+        - secretRef:
+            name: openldap-config
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: openldap-data
+
+---
+
+# dnknth/ldap-ui deployment
+# https://github.com/dnknth/ldap-ui
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ldap-ui
+  labels:
+    app: ldap-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ldap-ui
+  template:
+    metadata:
+      labels:
+        app: ldap-ui
+    spec:
+      containers:
+      - name: ldap-ui
+        image: "dnknth/ldap-ui:0.9.12-x86_64"
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: openldap-ui-config
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+
+---
+
+# Bitnami OpenLDAP service
+apiVersion: v1
+kind: Service
+metadata:
+  name: openldap
+spec:
+  ports:
+  - name: ldap
+    port: 1389
+    targetPort: 1389
+  - name: ldaps
+    port: 1636
+    targetPort: 1636
+  selector:
+    app: openldap
+  type: ClusterIP
+
+---
+
+# dnknth/ldap-ui service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ldap-ui
+spec:
+  ports:
+  - name: http
+    port: 5000
+    targetPort: 5000
+  selector:
+    app: ldap-ui
+  type: ClusterIP
